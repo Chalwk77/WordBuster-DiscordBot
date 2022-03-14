@@ -23,17 +23,9 @@ local BadWords = {}
 local time = os.clock
 local lines = io.lines
 
-local words = {}
-local function StringToTable(str)
-    local t = {}
-    for i = 1, str:len() do
-        t[#t + 1] = str:sub(i, i)
-    end
-    return t
-end
-
 function BadWords:Load()
 
+    local words = {}
     self.client:info('Loading languages...')
 
     local count, start = 0, time()
@@ -44,7 +36,7 @@ function BadWords:Load()
         if (load) then
             count = count + 1
             for line in lines(dir .. lang .. '.txt') do
-                words[#words + 1] = { self:GetRegex(line), line, lang }
+                words[#words + 1] = self:GetRegex(line)
             end
         end
     end
@@ -55,8 +47,16 @@ function BadWords:Load()
         self.client:info(#words .. ' words loaded in ' .. total_time .. ' seconds')
         self.settings.words = words
     else
-        self.client:info('No words were loaded')
+        self.client:warning('No words were loaded')
     end
+end
+
+local function StringToTable(str)
+    local t = {}
+    for i = 1, str:len() do
+        t[#t + 1] = str:sub(i, i)
+    end
+    return t
 end
 
 function BadWords:GetRegex(line)

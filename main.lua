@@ -72,8 +72,8 @@ Discord:on('ready', function()
         }
         mt = { __index = mt }
 
-        setmetatable(Grace, mt)
         setmetatable(BadWords, mt)
+        setmetatable(Grace, mt)
         setmetatable(MessageHandler, mt)
 
         BadWords:Load()

@@ -45,9 +45,7 @@ function MessageHandler:OnSend(msg)
 
     for i = 1, #words do
 
-        local pattern = words[i]
-        local regex = pattern[1]
-
+        local regex = words[i]
         if (word:match('[^%a]' .. regex .. '[^%a]')) then
 
             msg:delete()

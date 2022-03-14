@@ -26,18 +26,13 @@ local floor = math.floor
 
 function Grace:Check()
 
-    if (self.infractions) then
-        for id, v in pairs(self.infractions) do
-            if (id) then
-                local day = v.last_infraction.day
-                local month = v.last_infraction.month
-                local year = v.last_infraction.year
-                local reference = time { day = day, month = month, year = year }
-                local days_from = diff(time(), reference) / (24 * 60 * 60)
-                if (floor(days_from) >= self.settings.grace_period) then
-                    self.infractions[id] = nil
-                    self.write(self.infractions)
-                end
+    for id, v in pairs(self.infractions) do
+        if (id) then
+            local reference = time { day = v.last_infraction.day, month = v.last_infraction.month, year = v.last_infraction.year }
+            local days_from = diff(time(), reference) / (24 * 60 * 60)
+            if (floor(days_from) >= self.settings.grace_period) then
+                self.infractions[id] = nil
+                self.write(self.infractions)
             end
         end
     end

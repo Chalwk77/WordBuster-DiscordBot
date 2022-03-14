@@ -53,8 +53,9 @@ local function LoadInfractions()
     if (not data) then
         WriteToFile({})
     end
+    data = data or {}
 
-    return data or {}
+    return data
 end
 
 Discord:on('ready', function()

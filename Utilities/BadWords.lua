@@ -20,7 +20,6 @@
 
 local BadWords = {}
 
-local open = io.open
 local time = os.clock
 local lines = io.lines
 
@@ -33,14 +32,6 @@ local function StringToTable(str)
     return t
 end
 
-local function RemoveEmptyFilters()
-    for k, v in pairs(words) do
-        if (k and v[1] == "" or v[1] == " ") then
-            words[k] = nil
-        end
-    end
-end
-
 function BadWords:Load()
 
     self.client:info('Loading languages...')
@@ -51,41 +42,37 @@ function BadWords:Load()
 
     for lang, load in pairs(languages) do
         if (load) then
-            local path = dir .. lang .. ".txt"
-            local file = open(path, "r")
-            if (file) then
-                file:close()
-                count = count + 1
-                for line in lines(path) do
-                    local regex = ""
-                    local t = StringToTable(line)
-                    for _, char in pairs(t) do
-                        local chars = self.settings.patterns[char]
-                        if (chars) then
-                            for i = 1, #chars do
-                                if (chars[i]) then
-                                    regex = regex .. chars[i]
-                                end
-                            end
-                        else
-                            regex = regex .. "."
-                        end
-                    end
-                    words[#words + 1] = { regex, line, lang }
-                end
+            count = count + 1
+            for line in lines(dir .. lang .. '.txt') do
+                words[#words + 1] = { self:GetRegex(line), line, lang }
             end
         end
     end
 
     if (#words > 0) then
-        RemoveEmptyFilters(self)
         local total_time = time() - start
-        self.client:info("Successfully loaded " .. count .. " languages:")
-        self.client:info(#words .. " words loaded in " .. total_time .. " seconds")
+        self.client:info('Successfully loaded ' .. count .. ' languages:')
+        self.client:info(#words .. ' words loaded in ' .. total_time .. ' seconds')
         self.settings.words = words
     else
-        self.client:info("No words were loaded")
+        self.client:info('No words were loaded')
     end
+end
+
+function BadWords:GetRegex(line)
+    local regex = ''
+    local t = StringToTable(line)
+    for _, char in pairs(t) do
+        local chars = self.settings.patterns[char]
+        if (chars) then
+            for i = 1, #chars do
+                if (chars[i]) then
+                    regex = regex .. chars[i]
+                end
+            end
+        end
+    end
+    return regex
 end
 
 return BadWords

@@ -76,8 +76,8 @@ Discord:on('ready', function()
         setmetatable(BadWords, mt)
         setmetatable(MessageHandler, mt)
 
-        Grace:Check()
         BadWords:Load()
+        Grace:Check()
         Discord:info('Ready: ' .. Discord.user.tag)
     end
 end)

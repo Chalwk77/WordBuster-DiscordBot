@@ -18,22 +18,20 @@
     along with Word Buster. If not, see <http://www.gnu.org/licenses/>.
 ]]
 
-local MessageHandler = {}
-
-local function Kick(member, settings)
-    member:send(settings.on_punish:gsub('$punishment', 'kicked'))
-    member:kick()
-end
-
-local function Ban(member, settings)
-    member:send(settings.on_punish:gsub('$punishment', 'banned'))
-    member:ban()
-end
-
-local function Timeout(member, settings)
-    member:send(settings.on_punish:gsub('$punishment', 'timed out'))
-    member:timeoutFor(settings.timeout_duration * 60)
-end
+local MessageHandler = {
+    kick = function(member, settings)
+        member:send(settings.on_punish:gsub('$punishment', 'kicked'))
+        member:kick()
+    end,
+    ban = function(member, settings)
+        member:send(settings.on_punish:gsub('$punishment', 'banned'))
+        member:ban()
+    end,
+    timeout = function(member, settings)
+        member:send(settings.on_punish:gsub('$punishment', 'timed out'))
+        member:timeoutFor(settings.timeout_duration * 60)
+    end
+}
 
 function MessageHandler:OnSend(msg)
 
@@ -56,11 +54,11 @@ function MessageHandler:OnSend(msg)
                 member:send(self.settings.last_warning)
             elseif (self.infractions[id].warnings > self.settings.warnings) then
                 if (self.settings.punishment == 'kick') then
-                    Kick(member)
+                    self:kick(member, self.settings)
                 elseif (self.settings.punishment == 'ban') then
-                    Ban(member)
+                    self:ban(member, self.settings)
                 elseif (self.settings.punishment == 'timeout') then
-                    Timeout(member)
+                    self:timeout(member, self.settings)
                 end
                 self.infractions[id] = nil
             else

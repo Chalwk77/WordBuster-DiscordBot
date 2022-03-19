@@ -18,7 +18,7 @@
     along with Word Buster. If not, see <http://www.gnu.org/licenses/>.
 ]]
 
-local MessageHandler = {
+local Message = {
     kick = function(member, settings)
         member:send(settings.on_punish:gsub('$punishment', 'kicked'))
         member:kick()
@@ -33,45 +33,63 @@ local MessageHandler = {
     end
 }
 
-function MessageHandler:OnSend(msg)
+function Message:FormatNotify(name, word, pattern, lang)
+    local msg = self.settings.notify_console_format
+    if (self.settings.notify_console) then
+        msg = msg              :gsub('$name', name):
+        gsub('$word', word)    :
+        gsub('$regex', pattern):
+        gsub('$lang', lang)
+        self.client:warning(msg)
+    end
+end
+
+function Message:Send(msg)
 
     local words = self.settings.words
     local id = msg.member.id
     local member = msg.member
     local message = msg.content
+    local name = msg.member.name
     local word = message:lower():gsub('(.*)', ' %1 ')
 
     for i = 1, #words do
 
-        local regex = words[i]
-        if (word:match('[^%a]' .. regex .. '[^%a]')) then
+        local regex = words[i].regex
+        local lang = words[i].language
 
-            msg:delete()
+        for j = 1, #regex do
+            if (word:find('[^%a]' .. regex[j] .. '[^%a]')) then
 
-            self:NewInfraction(id, msg.member.name)
+                msg:delete()
 
-            if (self.infractions[id].warnings == self.settings.warnings) then
-                member:send(self.settings.last_warning)
-            elseif (self.infractions[id].warnings > self.settings.warnings) then
-                if (self.settings.punishment == 'kick') then
-                    self:kick(member, self.settings)
-                elseif (self.settings.punishment == 'ban') then
-                    self:ban(member, self.settings)
-                elseif (self.settings.punishment == 'timeout') then
-                    self:timeout(member, self.settings)
+                self:FormatNotify(name, words[i].word, regex[j], lang)
+                self:NewInfraction(id, msg.member.name)
+
+                if (self.infractions[id].warnings == self.settings.warnings) then
+                    member:send(self.settings.last_warning)
+                elseif (self.infractions[id].warnings > self.settings.warnings) then
+                    if (self.settings.punishment == 'kick') then
+                        self:kick(member, self.settings)
+                    elseif (self.settings.punishment == 'ban') then
+                        self:ban(member, self.settings)
+                    elseif (self.settings.punishment == 'timeout') then
+                        self:timeout(member, self.settings)
+                    end
+                    self.infractions[id] = nil
+                else
+                    member:send(self.settings.notify_text)
                 end
-                self.infractions[id] = nil
-            else
-                member:send(self.settings.notify_text)
+                self.write(self.settings.infractions_directory, self.infractions, true)
+                goto done
             end
-            self.write(self.infractions)
-            break
         end
     end
+    :: done ::
 end
 
 local date = os.date
-function MessageHandler:NewInfraction(id, name)
+function Message:NewInfraction(id, name)
 
     local day = date('*t').day
     local month = date('*t').month
@@ -83,4 +101,4 @@ function MessageHandler:NewInfraction(id, name)
     self.infractions[id].name = name
 end
 
-return MessageHandler
+return Message

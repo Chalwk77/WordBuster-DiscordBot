@@ -35,8 +35,18 @@ function BadWords:Load()
     for lang, load in pairs(languages) do
         if (load) then
             count = count + 1
-            for line in lines(dir .. lang .. '.txt') do
-                words[#words + 1] = self:GetRegex(line)
+            local success = pcall(function()
+                for line in lines(dir .. lang) do
+                    local regex  = self:GetRegex(line)
+                    words[#words + 1] = {
+                        regex = regex,
+                        language = lang,
+                        word = line
+                    }
+                end
+            end)
+            if (not success) then
+                self.client:warning('Warning: ' .. lang .. ' NOT FOUND in ' .. dir)
             end
         end
     end
@@ -51,23 +61,18 @@ function BadWords:Load()
     end
 end
 
-local function StringToTable(str)
-    local t = {}
-    for i = 1, str:len() do
-        t[#t + 1] = str:sub(i, i)
-    end
-    return t
-end
-
 function BadWords:GetRegex(line)
-    local regex = ''
-    local t = StringToTable(line)
+    local t = self.stringToTable(line)
+    local patterns = self.settings.patterns
+    local regex = {}
     for _, char in pairs(t) do
-        local chars = self.settings.patterns[char]
+        local chars = patterns[char]
         if (chars) then
-            for i = 1, #chars do
-                if (chars[i]) then
-                    regex = regex .. chars[i]
+            for id, pattern in pairs(chars) do
+                if (not regex[id]) then
+                    regex[id] = pattern
+                else
+                    regex[id] = regex[id] .. pattern
                 end
             end
         end

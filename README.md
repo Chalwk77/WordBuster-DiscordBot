@@ -3,6 +3,29 @@
 **Description:**<br/>
 An advanced profanity filter Discord Bot framework built using the Discordia API and Luvit runtime environment
 
+## **[ FEATURES ]**
+* Pattern matching algorithm to detect variations of words, like "**asshole**", "**a$$hole**", "**assH0l3**" or "**a55h01e.**
+* Block bad words.
+* Kick, Ban or Timeout a user
+* Supports multiple languages
+* Warning System + Grace Period
+* Customizable messages
+
+**COMMANDS:**
+Command | Description
+------------ | -------------
+/wb_add_word `(word)` `(lang)`|Add a word to lang file
+/wb_del_word `(word)` `(lang)`|Delete a word from lang file
+/wb_disable_lang `(lang)`|Disable lang file
+/wb_enable_lang `(lang)`|Enable lang file
+/wb_langs|Show list of langs
+
+## **[ SUPPORTED LANGUAGES]**
+Chinese, Czech, Danish, Dutch, English, Esperanto
+French, German, Hungry, Italian, Japanese
+Korean, Norwegian, Polish, Portuguese, Russian
+Spanish, Swedish, Thai, Turkish, Vietnamese
+
 **Download at bottom of page**
 ___
 
